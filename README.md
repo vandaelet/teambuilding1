@@ -1,14 +1,35 @@
-# Klassenquiz 1ste jaar — digitale versie (met klas-login en leerkrachtpagina)
+# Klassenquiz &amp; teambuilding 1ste jaar — digitale versie
 
 Eén bestand (`index.html`) met drie schermen:
 
 - **Startscherm** — elke klas klikt op de eigen klasnaam (1C t/m 1J) om in te loggen.
-- **Klasscherm** (na het kiezen van een klas) — **Projectie**: de vragen groot in beeld voor de
-  beamer, met een "Toon antwoord"-knop. **Onze score**: hier vult die klas enkel de eigen scores
-  in. Een klas ziet nooit de scores of ranglijst van een andere klas.
+- **Klasscherm** (na het kiezen van een klas), met twee tabbladen:
+  - **📽 Kwis** — per ronde wordt elke vraag groot geprojecteerd; de klas typt één gezamenlijk
+    antwoord in. Zolang de ronde niet is ingediend, kan elk antwoord nog aangepast worden (via
+    "Vorige"/"Volgende"). Na de laatste vraag verschijnt een letterraadsel-scherm: de tip wordt
+    herhaald en de beginletters van de zonet ingevulde antwoorden verschijnen automatisch in
+    vakjes. Pas na "Ronde indienen" worden de juiste antwoorden getoond (met ✓/✗) en telt het
+    programma zelf de rondescore — die ronde kan dan niet meer bewerkt worden. Voor de ene vraag
+    waarvan het antwoord van school tot school of van geluidsfragment tot geluidsfragment
+    verschilt (het afgespeelde lied, en de volledige Ronde 6 "Ontdek onze school"), beoordeelt de
+    klas zelf "Juist"/"Fout" na het indienen — precies zoals bij klassikale verbetering op papier.
+  - **🏃 Teambuilding-activiteiten** — hier vult de begeleidende leerkracht per doe-opdracht het
+    gemeten resultaat in (tijd in seconden, afstand/hoogte in cm, aantal). Voor Opdracht 1
+    (klasfoto) en Opdracht 7 (dierenalfabet) vult de leerkracht rechtstreeks het resultaat in.
+  - Een klas ziet nooit de scores, antwoorden of ranglijst van een andere klas.
 - **Leerkrachtscherm** — enkel bereikbaar met een wachtwoord, toont de **live eindranglijst** van
-  alle klassen samen, automatisch berekend en gesorteerd. Zodra een klas op "Score opslaan" klikt,
-  verandert deze lijst meteen mee, ook al staat ze open op een heel ander toestel.
+  alle klassen samen: kwispunten (automatisch verbeterd) + teambuildingpunten (automatisch
+  gerangschikt op basis van de ingevulde tijden/afstanden/aantallen, telkens 10 punten voor de
+  beste klas tot 1 punt voor de laatste, nadien gehalveerd — exact zoals in het originele
+  draaiboek). Zodra een klas iets opslaat, werkt deze lijst overal automatisch mee bij.
+
+## Belangrijk als je een eerdere versie al had ingesteld
+
+Dit bestand is volledig herschreven. Als je op je live site al een eigen `FIREBASE_CONFIG` en
+`ADMIN_PASSWORD` had ingevuld, moet je die **opnieuw** plakken in dit nieuwe bestand vóór je het
+opnieuw naar GitHub uploadt (zoek ze op in je Firebase-projectconsole, of open je oude,
+al-geüploade `index.html` in GitHub om ze over te kopiëren). De opslagstructuur in Firestore
+("scores"-verzameling) blijft dezelfde; er is geen nieuwe Firebase-installatie nodig.
 
 ## Waarom is er een extra installatiestap (Firebase) nodig?
 
