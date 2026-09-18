@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klassenquiz 1ste jaar</title>
+<style>
+  :root{
+    --bg:#12182b; --bg2:#1b2340; --card:#212a4a;
+    --accent:#4fd1a5; --accent2:#f2a154; --text:#f3f5fb;
+    --muted:#a7b0cf; --danger:#e2607a; --border:#33406b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(160deg,var(--bg),var(--bg2));color:var(--text);min-height:100vh;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;
+    border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px;}
+  header h1{font-size:20px;margin:0;font-weight:700;}
+  header h1 span{color:var(--accent);}
+  .who{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--muted);}
+  .who b{color:var(--accent2);}
+  header nav button{background:transparent;border:1px solid var(--border);color:var(--muted);
+    padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600;}
+  header nav button:hover{border-color:var(--accent);color:var(--text);}
+  main{padding:24px 28px 60px;max-width:1100px;margin:0 auto;}
+  .view{display:none;} .view.active{display:block;}
+  .center-wrap{max-width:640px;margin:40px auto;text-align:center;}
+  .warn-banner{background:#4a2a1c;border:1px solid var(--accent2);color:#ffd9b0;
+    padding:14px 18px;border-radius:10px;margin-bottom:22px;font-size:14px;text-align:left;line-height:1.6;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;}
+  h2.section-title{margin-top:0;font-size:18px;color:var(--accent2);}
+  .class-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0;}
+  @media (max-width:560px){.class-grid{grid-template-columns:repeat(2,1fr);}}
+  .class-btn{padding:22px 10px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);
+    color:var(--text);font-size:20px;font-weight:800;cursor:pointer;}
+  .class-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .divider{border:none;border-top:1px solid var(--border);margin:32px 0;}
+  .admin-login{max-width:320px;margin:0 auto;text-align:left;}
+  label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px;font-weight:600;}
+  input[type=text],input[type=number],input[type=password]{width:100%;padding:10px 12px;border-radius:8px;
+    border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:15px;}
+  button.action{padding:11px 18px;border-radius:9px;border:none;font-weight:700;cursor:pointer;font-size:14px;}
+  .btn-primary{background:var(--accent);color:#0d1424;}
+  .btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border) !important;}
+  .btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border) !important;}
+  .full{width:100%;margin-top:14px;}
+
+  /* tabs inside class/admin view */
+  .subtabs{display:flex;gap:8px;margin-bottom:22px;}
+  .subtabs button{background:transparent;border:1px solid var(--border);color:var(--muted);
+    padding:9px 18px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;}
+  .subtabs button.active{background:var(--accent);color:#0d1424;border-color:var(--accent);}
+  .subview{display:none;} .subview.active{display:block;}
+
+  /* projection */
+  .proj-topbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+  .ronde-pill{padding:10px 18px;border-radius:999px;border:1px solid var(--border);
+    background:var(--card);color:var(--muted);cursor:pointer;font-size:14px;font-weight:600;}
+  .ronde-pill.active{background:var(--accent2);color:#241304;border-color:var(--accent2);}
+  .proj-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:48px;
+    text-align:center;min-height:340px;display:flex;flex-direction:column;justify-content:center;gap:18px;}
+  .proj-theme{color:var(--accent2);font-size:20px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+  .proj-tip{color:var(--muted);font-size:16px;font-style:italic;}
+  .proj-q-label{color:var(--accent);font-size:22px;font-weight:700;}
+  .proj-q-text{font-size:clamp(26px,4vw,44px);font-weight:600;line-height:1.35;}
+  .proj-answer{margin-top:10px;font-size:clamp(22px,3vw,32px);color:var(--accent);font-weight:700;
+    background:rgba(79,209,165,.12);border:1px solid var(--accent);border-radius:12px;padding:14px 20px;}
+  .proj-controls{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:26px;flex-wrap:wrap;}
+  .proj-controls button{padding:14px 26px;border-radius:10px;border:none;font-size:16px;font-weight:700;cursor:pointer;}
+  .proj-counter{color:var(--muted);font-size:15px;margin-top:4px;text-align:center;}
+  .fullscreen-btn{position:fixed;bottom:22px;right:22px;background:var(--card);border:1px solid var(--border);
+    color:var(--text);padding:12px 18px;border-radius:10px;cursor:pointer;font-weight:600;}
+
+  /* score form */
+  .score-grid{display:grid;grid-template-columns:1fr 90px;gap:8px 12px;align-items:center;}
+  .score-grid .item-label{font-size:13.5px;color:var(--text);}
+  .score-grid .item-max{color:var(--muted);font-weight:400;font-size:12px;}
+  .total-line{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:14px;
+    border-top:1px dashed var(--border);font-size:16px;font-weight:700;}
+  .total-line span.val{color:var(--accent);font-size:22px;}
+  .save-status{font-size:12.5px;color:var(--muted);margin-top:10px;min-height:16px;}
+  .save-status.ok{color:var(--accent);}
+
+  /* leaderboard */
+  table{width:100%;border-collapse:collapse;margin-top:6px;}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--border);font-size:14px;}
+  th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px;}
+  tr:first-child td{font-weight:700;color:var(--accent);}
+  .rank{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+    border-radius:50%;background:var(--bg2);font-size:12px;font-weight:700;margin-right:6px;}
+  .empty{color:var(--muted);font-size:14px;padding:14px 0;}
+  .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);
+    margin-right:6px;box-shadow:0 0 0 0 rgba(79,209,165,.6);animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(79,209,165,.5);}70%{box-shadow:0 0 0 8px rgba(79,209,165,0);}100%{box-shadow:0 0 0 0 rgba(79,209,165,0);}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Klassenquiz 1ste jaar <span>· digitaal</span></h1>
+  <div class="who" id="whoBar"></div>
+</header>
+
+<main>
+
+  <!-- ================= START / LOGIN ================= -->
+  <section id="view-start" class="view active">
+    <div id="setupWarning"></div>
+    <div class="center-wrap">
+      <div class="card">
+        <h2 class="section-title">Kies je klas</h2>
+        <p style="color:var(--muted);font-size:14px;">
+          Klik op jouw klas om de vragen te projecteren en jullie eigen scores in te vullen.
+          Andere klassen of de eindranglijst zijn hier niet zichtbaar.
+        </p>
+        <div class="class-grid" id="classGrid"></div>
+
+        <hr class="divider">
+
+        <h2 class="section-title">Leerkracht</h2>
+        <p style="color:var(--muted);font-size:14px;">Enkel voor de organisator — geeft toegang tot de live eindranglijst.</p>
+        <div class="admin-login">
+          <label>Wachtwoord</label>
+          <input type="password" id="adminPw" placeholder="Wachtwoord">
+          <button class="action btn-primary full" id="btnAdminLogin">Aanmelden als leerkracht</button>
+          <div class="save-status" id="adminLoginMsg"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= KLAS-WEERGAVE ================= -->
+  <section id="view-klas" class="view">
+    <div class="subtabs">
+      <button id="tab-proj" class="active">📽 Projectie</button>
+      <button id="tab-score">✏️ Onze score</button>
+    </div>
+
+    <div id="sub-proj" class="subview active">
+      <div class="proj-topbar" id="rondePills"></div>
+      <div class="proj-card">
+        <div class="proj-theme" id="pTheme"></div>
+        <div class="proj-tip" id="pTip"></div>
+        <div class="proj-q-label" id="pQLabel"></div>
+        <div class="proj-q-text" id="pQText"></div>
+        <div id="pAnswerWrap"></div>
+      </div>
+      <div class="proj-controls">
+        <button class="btn-secondary" id="btnPrev">← Vorige</button>
+        <button class="btn-primary" id="btnReveal">Toon antwoord</button>
+        <button class="btn-secondary" id="btnNext">Volgende →</button>
+      </div>
+      <div class="proj-counter" id="pCounter"></div>
+    </div>
+
+    <div id="sub-score" class="subview">
+      <div class="card" style="max-width:520px;">
+        <h2 class="section-title" id="scoreKlasTitel">Score voor klas</h2>
+        <div id="scoreItems" class="score-grid"></div>
+        <div class="total-line"><span>Totaal</span><span class="val" id="klasTotaal">0</span></div>
+        <button class="action btn-primary full" id="btnSaveKlas">Score opslaan</button>
+        <div class="save-status" id="saveMsg"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ADMIN-WEERGAVE ================= -->
+  <section id="view-admin" class="view">
+    <div class="card">
+      <h2 class="section-title"><span class="live-dot"></span>Live eindranglijst</h2>
+      <p style="color:var(--muted);font-size:13.5px;margin-top:-6px;">
+        Werkt automatisch bij: zodra een klas hun score opslaat, verschijnt of verandert die hier meteen.
+      </p>
+      <table id="leaderboard">
+        <thead><tr><th>#</th><th>Klas</th><th>Totaal</th><th>Laatst bijgewerkt</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div id="lbEmpty" class="empty">Nog geen enkele klas heeft een score opgeslagen.</div>
+    </div>
+  </section>
+
+</main>
+
+<button class="fullscreen-btn" id="btnFullscreen">⛶ Volledig scherm</button>
+
+<!-- Firebase (gratis, gebruikt om scores live te synchroniseren tussen alle klassen en de leerkracht) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+/* ============================================================
+   INSTELLINGEN — hier pas je jouw eigen gegevens aan
+   ============================================================ */
+
+// 1) Plak hier de configuratie van je eigen Firebase-project
+//    (zie README.md — Stap "Firebase instellen").
+const FIREBASE_CONFIG = {
+  apiKey: "PLAK_HIER_JE_API_KEY",
+  authDomain: "PLAK_HIER_JE_AUTH_DOMAIN",
+  projectId: "PLAK_HIER_JE_PROJECT_ID",
+  storageBucket: "PLAK_HIER_JE_STORAGE_BUCKET",
+  messagingSenderId: "PLAK_HIER_JE_SENDER_ID",
+  appId: "PLAK_HIER_JE_APP_ID"
+};
+
+// 2) Het wachtwoord waarmee jij (en enkel jij) de eindranglijst kan bekijken.
+//    Verander dit gerust naar iets van jezelf.
+const ADMIN_PASSWORD = "teambuilding2026";
+
+// 3) De deelnemende klassen.
+const CLASSES = ["1C","1D","1E","1F","1G","1H","1I","1J"];
+
+/* ============================================================
+   QUIZINHOUD — vragen, tips en antwoorden
+   ============================================================ */
+const RONDES = [
+  {
+    id: 1, thema: "Ronde 1 · Algemene kennis", tip: "Tip: Amerikaans ex-president",
+    vragen: [
+      { q: "Van welk land is Reykjavik de hoofdstad?", a: "IJsland" },
+      { q: "Welk knaagdier heeft een platte staart en schopachtige poten waarmee hij dammen kan bouwen? Het is ook het nationale dier van Canada.", a: "Bever" },
+      { q: "Welk soort fruit lijkt op een perzik maar heeft een gladde huid en smaakt zoet?", a: "Nectarine" },
+      { q: "Wie is de uitvinder van de gloeilamp?", a: "Edison" },
+      { q: "Welke munt wordt gebruikt in de Verenigde Staten?", a: "Dollar" },
+    ],
+    tipwoord: "BIDEN"
+  },
+  {
+    id: 2, thema: "Ronde 2 · Wetenschap en techniek", tip: "Tip: dit toestel werkt met het binair talstelsel",
+    vragen: [
+      { q: "Welke apensoort heeft lange oranje haren en lange armen waarmee hij van tak naar tak slingert?", a: "Orang-oetan" },
+      { q: "Wat is de naam van een vierhoek met twee paar evenwijdige zijden?", a: "Parallellogram" },
+      { q: "Welke grootheid wordt uitgedrukt in graden Celsius?", a: "Temperatuur" },
+      { q: "Hoe heet het proces waarbij je gebruikte materialen hergebruikt om afval te verminderen?", a: "Recyclage / recycleren" },
+      { q: "Welk fantasiedier woont aan het einde van de regenboog? De term wordt ook gebruikt voor techbedrijven vanaf 1 miljard dollar waarde. Engelse benaming?", a: "Unicorn" },
+      { q: "Afkorting van het geurloze broeikasgas dat planten gebruiken bij fotosynthese en dat vrijkomt bij verbranding van brandstoffen?", a: "CO2" },
+      { q: "Welke planeet wordt ook de rode planeet genoemd?", a: "Mars" },
+      { q: "Hoe heet de plotse uitbraak van een besmettelijke ziekte die zich razendsnel verspreidt in een gebied?", a: "Epidemie" },
+    ],
+    tipwoord: "COMPUTER"
+  },
+  {
+    id: 3, thema: "Ronde 3 · Sport", tip: "Tip: een balsport",
+    vragen: [
+      { q: "Familienaam van de Belgische atlete die goud won op de laatste 3 Olympische Spelen?", a: "Thiam" },
+      { q: "Welke sport lijkt op volleybal, maar mag je de bal met je handen vangen?", a: "Netbal" },
+      { q: "Welke sport speel je met een stick, glijdend, om een puck in doel te werken?", a: "IJshockey" },
+      { q: "Term voor een pass in balsporten zonder te kijken naar wie je aanspeelt?", a: "No-look pass" },
+      { q: "Turnterm voor een soort koprol in de lucht?", a: "Salto" },
+      { q: "Voornaam van de Belgische wielrenner met bijnaam 'De Kannibaal', gezien als de beste ooit?", a: "Eddy" },
+    ],
+    tipwoord: "TENNIS"
+  },
+  {
+    id: 4, thema: "Ronde 4 · Geschiedenis en cultuur", tip: "Tip: Italië",
+    vragen: [
+      { q: "Onze koning wordt erfelijk bepaald. Hoe heet de staatsvorm waarbij het staatshoofd wél verkozen wordt door het volk?", a: "Republiek" },
+      { q: "Welke oude beschaving bouwde de piramides?", a: "Egyptenaren" },
+      { q: "Welk bouwwerk werd in 1989 gesloopt in Berlijn om Duitsland te herenigen?", a: "Muur" },
+      { q: "Familienaam van de eerste zwarte Amerikaanse president?", a: "Obama" },
+    ],
+    tipwoord: "ROME"
+  },
+  {
+    id: 5, thema: "Ronde 5 · Muziek en film", tip: "Tip: bolletjes met stokje",
+    vragen: [
+      { q: "Romantische film over Jack en Rose, gebaseerd op de ondergang van een schip op 10 april 1912 van Southampton naar New York?", a: "Titanic" },
+      { q: "Britse rockband van de broers Liam en Noël Gallagher, dit jaar herenigd. Naam = ook een fruitig gesuikerd drankje.", a: "Oasis" },
+      { q: "We spelen een lied af (zie eigen audio/playlist). Leerlingen raden de titel.", a: "New Rules (Dua Lipa) — of eigen gekozen lied" },
+      { q: "Jaarlijks Europees liedjesfestival waarbij elk land een artiest afvaardigt en publiek + jury's stemmen?", a: "Eurovisiesongfestival" },
+      { q: "Met welke zangvogel vergelijken we iemand die zeer mooi kan zingen?", a: "Nachtegaal" },
+    ],
+    tipwoord: "NOTEN"
+  },
+  {
+    id: 6, thema: "Ronde 6 · Ontdek onze school", tip: "Geen letterraadsel — schoolspecifieke antwoorden hieronder",
+    vragen: [
+      { q: "Hoeveel traptreden vinden we in blok B?", a: "(schoolspecifiek antwoord — hier invullen)" },
+      { q: "Hoeveel klaslokalen (ingeroosterd als leslokaal) telt onze school?", a: "(schoolspecifiek antwoord — hier invullen)" },
+      { q: "Hoeveel leerlingen zijn op dit moment in het eerste jaar ingeschreven?", a: "(schoolspecifiek antwoord — hier invullen)" },
+      { q: "Hoeveel leerkrachten geven les aan het eerste en/of tweede jaar?", a: "(schoolspecifiek antwoord — hier invullen)" },
+      { q: "Wat is de naam van onze directeur (voor- en familienaam)?", a: "(schoolspecifiek antwoord — hier invullen)" },
+      { q: "Hoeveel stoelen staan er in de eetzaal (koude refter)?", a: "(schoolspecifiek antwoord — hier invullen)" },
+    ],
+    tipwoord: null
+  },
+];
+
+const SCORE_ITEMS = [
+  { id: "r1", label: "Ronde 1 — Algemene kennis", max: 5 },
+  { id: "r2", label: "Ronde 2 — Wetenschap en techniek", max: 8 },
+  { id: "r3", label: "Ronde 3 — Sport", max: 6 },
+  { id: "r4", label: "Ronde 4 — Geschiedenis en cultuur", max: 4 },
+  { id: "r5", label: "Ronde 5 — Muziek en film", max: 5 },
+  { id: "r6", label: "Ronde 6 — Ontdek de school", max: 6 },
+  { id: "o1", label: "Doe-opdracht 1 — Klasfoto", max: 5 },
+  { id: "o2", label: "Doe-opdracht 2 — Zoektocht", max: 10 },
+  { id: "o3", label: "Doe-opdracht 3 — Papieren vliegtuig", max: 10 },
+  { id: "o4", label: "Doe-opdracht 4 — Ballon", max: 10 },
+  { id: "o5", label: "Doe-opdracht 5 — Marshmallowtoren", max: 10 },
+  { id: "o6", label: "Doe-opdracht 6 — Ik ga op reis...", max: 20 },
+  { id: "o7", label: "Doe-opdracht 7 — Dierenalfabet", max: 26 },
+];
+
+/* ============================================================
+   FIREBASE INIT
+   ============================================================ */
+const setupNeeded = FIREBASE_CONFIG.apiKey.indexOf("PLAK_HIER") !== -1;
+let db = null;
+if (!setupNeeded){
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.firestore();
+} else {
+  document.getElementById("setupWarning").innerHTML =
+    '<div class="warn-banner"><b>⚠ Nog niet volledig ingesteld.</b> Vul bovenaan in het script-gedeelte ' +
+    'van index.html de FIREBASE_CONFIG in met je eigen Firebase-projectgegevens (zie README.md). ' +
+    'Zonder deze stap kunnen scores niet gedeeld worden tussen klassen en leerkracht.</div>';
+}
+
+/* ============================================================
+   ROUTING / SESSIE
+   ============================================================ */
+let session = JSON.parse(localStorage.getItem("quiz_session") || "null"); // {role:"klas", klas:"1C"} of {role:"admin"}
+
+function setSession(s){
+  session = s;
+  localStorage.setItem("quiz_session", JSON.stringify(s));
+  render();
+}
+function logout(){
+  session = null;
+  localStorage.removeItem("quiz_session");
+  render();
+}
+
+function render(){
+  document.getElementById("view-start").classList.toggle("active", !session);
+  document.getElementById("view-klas").classList.toggle("active", !!session && session.role === "klas");
+  document.getElementById("view-admin").classList.toggle("active", !!session && session.role === "admin");
+
+  const whoBar = document.getElementById("whoBar");
+  whoBar.innerHTML = "";
+  if (session){
+    const label = session.role === "klas" ? ("Klas " + session.klas) : "Leerkracht";
+    whoBar.innerHTML = 'Ingelogd als <b>' + label + '</b>';
+    const btn = document.createElement("button");
+    btn.textContent = "Uitloggen";
+    btn.onclick = logout;
+    whoBar.appendChild(btn);
+  }
+
+  if (session && session.role === "klas"){
+    document.getElementById("scoreKlasTitel").textContent = "Score voor klas " + session.klas;
+    loadOwnScore();
+  }
+  if (session && session.role === "admin"){
+    startLeaderboardListener();
+  }
+}
+
+/* start screen: class buttons */
+const classGrid = document.getElementById("classGrid");
+CLASSES.forEach(k => {
+  const b = document.createElement("button");
+  b.className = "class-btn";
+  b.textContent = k;
+  b.onclick = () => setSession({ role: "klas", klas: k });
+  classGrid.appendChild(b);
+});
+
+document.getElementById("btnAdminLogin").onclick = () => {
+  const pw = document.getElementById("adminPw").value;
+  if (pw === ADMIN_PASSWORD){
+    document.getElementById("adminLoginMsg").textContent = "";
+    setSession({ role: "admin" });
+  } else {
+    document.getElementById("adminLoginMsg").textContent = "Wachtwoord klopt niet.";
+    document.getElementById("adminLoginMsg").style.color = "var(--danger)";
+  }
+};
+
+/* ============================================================
+   PROJECTIE
+   ============================================================ */
+let currentRonde = 0, currentVraag = 0, answerShown = false;
+
+const rondePillsEl = document.getElementById("rondePills");
+RONDES.forEach((r, i) => {
+  const btn = document.createElement("button");
+  btn.className = "ronde-pill" + (i === 0 ? " active" : "");
+  btn.textContent = r.thema.split("·")[0].trim();
+  btn.onclick = () => { currentRonde = i; currentVraag = 0; answerShown = false; renderProj(); };
+  rondePillsEl.appendChild(btn);
+});
+
+function renderProj(){
+  const ronde = RONDES[currentRonde];
+  const vraag = ronde.vragen[currentVraag];
+  document.querySelectorAll(".ronde-pill").forEach((el, i) => el.classList.toggle("active", i === currentRonde));
+  document.getElementById("pTheme").textContent = ronde.thema;
+  document.getElementById("pTip").textContent = ronde.tip;
+  document.getElementById("pQLabel").textContent = "Vraag " + (currentVraag + 1) + " / " + ronde.vragen.length;
+  document.getElementById("pQText").textContent = vraag.q;
+  document.getElementById("pCounter").textContent = "Ronde " + (currentRonde+1) + " van " + RONDES.length;
+  const answerWrap = document.getElementById("pAnswerWrap");
+  answerWrap.innerHTML = "";
+  if (answerShown){
+    const div = document.createElement("div");
+    div.className = "proj-answer";
+    div.textContent = "Antwoord: " + vraag.a;
+    answerWrap.appendChild(div);
+  }
+  document.getElementById("btnReveal").textContent = answerShown ? "Verberg antwoord" : "Toon antwoord";
+}
+document.getElementById("btnReveal").onclick = () => { answerShown = !answerShown; renderProj(); };
+document.getElementById("btnNext").onclick = () => {
+  const ronde = RONDES[currentRonde];
+  if (currentVraag < ronde.vragen.length - 1){ currentVraag++; }
+  else if (currentRonde < RONDES.length - 1){ currentRonde++; currentVraag = 0; }
+  answerShown = false; renderProj();
+};
+document.getElementById("btnPrev").onclick = () => {
+  if (currentVraag > 0){ currentVraag--; }
+  else if (currentRonde > 0){ currentRonde--; currentVraag = RONDES[currentRonde].vragen.length - 1; }
+  answerShown = false; renderProj();
+};
+document.getElementById("btnFullscreen").onclick = () => {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+};
+renderProj();
+
+/* subtabs binnen klas-weergave */
+document.getElementById("tab-proj").onclick = () => switchSubtab("proj");
+document.getElementById("tab-score").onclick = () => switchSubtab("score");
+function switchSubtab(which){
+  document.getElementById("tab-proj").classList.toggle("active", which === "proj");
+  document.getElementById("tab-score").classList.toggle("active", which === "score");
+  document.getElementById("sub-proj").classList.toggle("active", which === "proj");
+  document.getElementById("sub-score").classList.toggle("active", which === "score");
+}
+
+/* ============================================================
+   SCORE VAN DE EIGEN KLAS (enkel zichtbaar/bewerkbaar voor die klas)
+   ============================================================ */
+const scoreItemsEl = document.getElementById("scoreItems");
+SCORE_ITEMS.forEach(item => {
+  const label = document.createElement("div");
+  label.className = "item-label";
+  label.innerHTML = item.label + ' <span class="item-max">(max ' + item.max + ')</span>';
+  const inputEl = document.createElement("input");
+  inputEl.type = "number"; inputEl.min = "0"; inputEl.step = "0.5";
+  inputEl.id = "score_" + item.id; inputEl.value = 0;
+  inputEl.oninput = updateKlasTotaal;
+  scoreItemsEl.appendChild(label);
+  scoreItemsEl.appendChild(inputEl);
+});
+
+function huidigeScores(){
+  const scores = {};
+  SCORE_ITEMS.forEach(item => { scores[item.id] = parseFloat(document.getElementById("score_" + item.id).value) || 0; });
+  return scores;
+}
+function totaalVan(scores){ return Object.values(scores).reduce((a,b) => a + b, 0); }
+function updateKlasTotaal(){ document.getElementById("klasTotaal").textContent = totaalVan(huidigeScores()); }
+
+function loadOwnScore(){
+  if (!db || !session || session.role !== "klas") return;
+  db.collection("scores").doc(session.klas).get().then(doc => {
+    if (doc.exists){
+      const scores = doc.data().scores || {};
+      SCORE_ITEMS.forEach(item => {
+        document.getElementById("score_" + item.id).value = scores[item.id] || 0;
+      });
+    }
+    updateKlasTotaal();
+  }).catch(() => updateKlasTotaal());
+}
+
+document.getElementById("btnSaveKlas").onclick = () => {
+  if (!db){ alert("Firebase is nog niet ingesteld — zie de waarschuwing bovenaan de startpagina."); return; }
+  const scores = huidigeScores();
+  const msg = document.getElementById("saveMsg");
+  msg.textContent = "Opslaan...";
+  msg.className = "save-status";
+  db.collection("scores").doc(session.klas).set({
+    scores: scores,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true }).then(() => {
+    msg.textContent = "Opgeslagen ✓ — totaal: " + totaalVan(scores);
+    msg.className = "save-status ok";
+  }).catch(err => {
+    msg.textContent = "Opslaan mislukt: " + err.message;
+    msg.className = "save-status";
+  });
+};
+
+/* ============================================================
+   ADMIN — live eindranglijst (enkel zichtbaar na leerkrachtwachtwoord)
+   ============================================================ */
+let leaderboardUnsub = null;
+function startLeaderboardListener(){
+  if (!db || leaderboardUnsub) return;
+  leaderboardUnsub = db.collection("scores").onSnapshot(snapshot => {
+    const rows = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      rows.push({
+        naam: doc.id,
+        totaal: totaalVan(data.scores || {}),
+        updated: data.updatedAt && data.updatedAt.toDate ? data.updatedAt.toDate() : null
+      });
+    });
+    rows.sort((a,b) => b.totaal - a.totaal);
+    renderLeaderboard(rows);
+  });
+}
+function renderLeaderboard(rows){
+  const tbody = document.querySelector("#leaderboard tbody");
+  tbody.innerHTML = "";
+  document.getElementById("lbEmpty").style.display = rows.length ? "none" : "block";
+  rows.forEach((row, i) => {
+    const tr = document.createElement("tr");
+    const tijd = row.updated ? row.updated.toLocaleTimeString("nl-BE", {hour:"2-digit",minute:"2-digit"}) : "—";
+    tr.innerHTML = '<td><span class="rank">' + (i+1) + '</span></td><td>' + row.naam + '</td><td>' + row.totaal + '</td><td>' + tijd + '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+/* init */
+render();
+</script>
+</body>
+</html>
