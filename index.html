@@ -126,7 +126,7 @@
     <div class="center-wrap">
       <div class="card">
         <h2 class="section-title">Kies je klas</h2>
-        <p class="helptext">Klik op jouw klas om de kwis te starten en de teambuilding-activiteiten in te vullen.</p>
+        <p class="helptext">Klik op jouw klas om de quiz te starten en de teambuilding-activiteiten in te vullen.</p>
         <div class="class-grid" id="classGrid"></div>
         <hr class="divider">
         <h2 class="section-title">Leerkracht</h2>
@@ -144,7 +144,7 @@
   <!-- ================= KLAS-WEERGAVE ================= -->
   <section id="view-klas" class="view">
     <div class="subtabs">
-      <button id="tab-kwis" class="active">📽 Kwis</button>
+      <button id="tab-kwis" class="active">📽 Quiz</button>
       <button id="tab-doe">🏃 Teambuilding-activiteiten</button>
     </div>
 
@@ -175,14 +175,39 @@
     <div class="card">
       <h2 class="section-title"><span class="live-dot"></span>Live eindranglijst</h2>
       <p class="helptext" style="margin-top:-6px;">
-        Werkt automatisch: kwispunten (auto-verbeterd) + teambuilding-punten (automatisch gerangschikt
+        Werkt automatisch: quizpunten (auto-verbeterd) + teambuilding-punten (automatisch gerangschikt
         op basis van tijd/afstand/aantal) worden opgeteld en bijgewerkt zodra een klas iets invult.
       </p>
       <table id="leaderboard">
-        <thead><tr><th>#</th><th>Klas</th><th>Kwis</th><th>Teambuilding</th><th>Totaal</th><th>Bijgewerkt</th></tr></thead>
+        <thead><tr><th>#</th><th>Klas</th><th>Quiz</th><th>Teambuilding</th><th>Totaal</th><th>Bijgewerkt</th></tr></thead>
         <tbody></tbody>
       </table>
       <div id="lbEmpty" class="empty">Nog geen enkele klas heeft gegevens opgeslagen.</div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h2 class="section-title">Quiz — score per ronde</h2>
+      <table id="detailQuiz"><thead></thead><tbody></tbody></table>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h2 class="section-title">Teambuilding — punten per opdracht</h2>
+      <p class="helptext" style="margin-top:-6px;">
+        Bij tijd/afstand/aantal-opdrachten zijn dit al de automatisch berekende punten (na
+        rangschikking en halvering), niet de ruwe ingevoerde meting.
+      </p>
+      <table id="detailDoe"><thead></thead><tbody></tbody></table>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h2 class="section-title">Nieuwe start</h2>
+      <p class="helptext">
+        Wist alle ingevulde quizantwoorden en teambuildingresultaten van alle klassen, zodat
+        iedereen opnieuw van nul kan beginnen (bv. na het testen, of voor een volgende editie).
+        Dit kan niet ongedaan gemaakt worden.
+      </p>
+      <button class="action btn-outline" id="btnResetAll">Alles wissen</button>
+      <div class="helptext" id="resetMsg"></div>
     </div>
   </section>
 
@@ -198,12 +223,12 @@
    INSTELLINGEN
    ============================================================ */
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDPPokXdf8xuRUtXgxvzDGTwJemP8nrATY",
-  authDomain: "teambuilding-1ste-jaar.firebaseapp.com",
-  projectId: "teambuilding-1ste-jaar",
-  storageBucket: "teambuilding-1ste-jaar.firebasestorage.app",
-  messagingSenderId: "685254520729",
-  appId: "1:685254520729:web:c29489cca9fff6d52f2d08"
+  apiKey: "PLAK_HIER_JE_API_KEY",
+  authDomain: "PLAK_HIER_JE_AUTH_DOMAIN",
+  projectId: "PLAK_HIER_JE_PROJECT_ID",
+  storageBucket: "PLAK_HIER_JE_STORAGE_BUCKET",
+  messagingSenderId: "PLAK_HIER_JE_SENDER_ID",
+  appId: "PLAK_HIER_JE_APP_ID"
 };
 const ADMIN_PASSWORD = "teambuilding2026";
 const CLASSES = ["1C","1D","1E","1F","1G","1H","1I","1J"];
@@ -277,12 +302,14 @@ const RONDES = [
          "value_desc" (grootste waarde wint — automatisch gerangschikt)
    Gerangschikte items krijgen automatisch 10 (beste) tot 1 (slechtste) punt,
    daarna gehalveerd, exact zoals in het originele draaiboek.
+   inputMode (optioneel): "time" -> invoer als minuten + seconden, opgeslagen als totaal in seconden.
+                           "distance" -> invoer als meter + centimeter, opgeslagen als totaal in cm.
    ============================================================ */
 const DOE_ITEMS = [
   { id:"o1", label:"Doe-opdracht 1 — Gekke klasfoto", type:"yesno", points:5, hint:"Is de klasfoto gemaakt en doorgestuurd naar Evie?" },
-  { id:"o2", label:"Doe-opdracht 2 — Zoektocht (3 voorwerpen)", type:"time_asc", unit:"seconden", hint:"Tijd om alle 3 voorwerpen te vinden en te brengen. Snelste klas krijgt de meeste punten." },
-  { id:"o3", label:"Doe-opdracht 3 — Papieren vliegtuig", type:"value_desc", unit:"cm", hint:"Afstand die het vliegtuig aflegde. Verste klas krijgt de meeste punten." },
-  { id:"o4", label:"Doe-opdracht 4 — Ballon opblazen", type:"time_asc", unit:"seconden", hint:"Tijd tot de ballon knapte. Snelste klas krijgt de meeste punten." },
+  { id:"o2", label:"Doe-opdracht 2 — Zoektocht (3 voorwerpen)", type:"time_asc", inputMode:"time", unit:"seconden", hint:"Tijd om alle 3 voorwerpen te vinden en te brengen. Snelste klas krijgt de meeste punten." },
+  { id:"o3", label:"Doe-opdracht 3 — Papieren vliegtuig", type:"value_desc", inputMode:"distance", unit:"cm", hint:"Afstand die het vliegtuig aflegde. Verste klas krijgt de meeste punten." },
+  { id:"o4", label:"Doe-opdracht 4 — Ballon opblazen", type:"time_asc", inputMode:"time", unit:"seconden", hint:"Tijd tot de ballon knapte. Snelste klas krijgt de meeste punten." },
   { id:"o5", label:"Doe-opdracht 5 — Marshmallowtoren", type:"value_desc", unit:"cm", hint:"Hoogte van de toren. Hoogste toren krijgt de meeste punten." },
   { id:"o6", label:"Doe-opdracht 6 — 'Ik ga op reis en ik neem mee...'", type:"value_desc", unit:"woorden", hint:"Aantal voorwerpen dat zonder fout werd opgenoemd. Meeste woorden krijgt de meeste punten." },
   { id:"o7", label:"Doe-opdracht 7 — Dierenalfabet", type:"direct", unit:"dieren", points:26, hint:"Aantal letters waarbij een correct dier werd ingevuld (max. 26)." },
@@ -456,7 +483,7 @@ document.getElementById("btnFullscreen").onclick = () => {
 };
 
 /* ============================================================
-   KWIS
+   QUIZ
    ============================================================ */
 let kwisRondeIdx = 0;
 let kwisStep = 0;
@@ -628,6 +655,34 @@ function renderDoeForm(){
       row.appendChild(select);
       const span = document.createElement("span"); span.className = "unit"; span.textContent = "(" + item.points + " punten indien ja)";
       row.appendChild(span);
+    } else if (item.inputMode === "time"){
+      const total = (typeof myData.doe[item.id] === "number") ? myData.doe[item.id] : null;
+      const mins = total !== null ? Math.floor(total / 60) : "";
+      const secs = total !== null ? (total % 60) : "";
+      const minInput = document.createElement("input");
+      minInput.type = "number"; minInput.min = "0"; minInput.step = "1";
+      minInput.id = "doe_" + item.id + "_min"; minInput.value = mins; minInput.style.maxWidth = "90px";
+      const secInput = document.createElement("input");
+      secInput.type = "number"; secInput.min = "0"; secInput.max = "59"; secInput.step = "1";
+      secInput.id = "doe_" + item.id + "_sec"; secInput.value = secs; secInput.style.maxWidth = "90px";
+      row.appendChild(minInput);
+      const span1 = document.createElement("span"); span1.className = "unit"; span1.textContent = "min"; row.appendChild(span1);
+      row.appendChild(secInput);
+      const span2 = document.createElement("span"); span2.className = "unit"; span2.textContent = "sec"; row.appendChild(span2);
+    } else if (item.inputMode === "distance"){
+      const total = (typeof myData.doe[item.id] === "number") ? myData.doe[item.id] : null;
+      const meters = total !== null ? Math.floor(total / 100) : "";
+      const cm = total !== null ? (total % 100) : "";
+      const mInput = document.createElement("input");
+      mInput.type = "number"; mInput.min = "0"; mInput.step = "1";
+      mInput.id = "doe_" + item.id + "_m"; mInput.value = meters; mInput.style.maxWidth = "90px";
+      const cmInput = document.createElement("input");
+      cmInput.type = "number"; cmInput.min = "0"; cmInput.max = "99"; cmInput.step = "1";
+      cmInput.id = "doe_" + item.id + "_cm"; cmInput.value = cm; cmInput.style.maxWidth = "90px";
+      row.appendChild(mInput);
+      const span1 = document.createElement("span"); span1.className = "unit"; span1.textContent = "m"; row.appendChild(span1);
+      row.appendChild(cmInput);
+      const span2 = document.createElement("span"); span2.className = "unit"; span2.textContent = "cm"; row.appendChild(span2);
     } else {
       const input = document.createElement("input");
       input.type = "number"; input.min = "0"; input.step = "0.1";
@@ -643,10 +698,21 @@ function renderDoeForm(){
 }
 document.getElementById("btnSaveDoe").onclick = () => {
   DOE_ITEMS.forEach(item => {
-    const el = document.getElementById("doe_" + item.id);
     if (item.type === "yesno"){
+      const el = document.getElementById("doe_" + item.id);
       myData.doe[item.id] = el.value === "ja" ? true : (el.value === "nee" ? false : null);
+    } else if (item.inputMode === "time"){
+      const minEl = document.getElementById("doe_" + item.id + "_min");
+      const secEl = document.getElementById("doe_" + item.id + "_sec");
+      const m = parseFloat(minEl.value), s = parseFloat(secEl.value);
+      myData.doe[item.id] = (isNaN(m) && isNaN(s)) ? null : (Math.max(0, m || 0) * 60 + Math.max(0, Math.min(59, s || 0)));
+    } else if (item.inputMode === "distance"){
+      const mEl = document.getElementById("doe_" + item.id + "_m");
+      const cmEl = document.getElementById("doe_" + item.id + "_cm");
+      const m = parseFloat(mEl.value), cm = parseFloat(cmEl.value);
+      myData.doe[item.id] = (isNaN(m) && isNaN(cm)) ? null : (Math.max(0, m || 0) * 100 + Math.max(0, Math.min(99, cm || 0)));
     } else {
+      const el = document.getElementById("doe_" + item.id);
       const v = parseFloat(el.value);
       myData.doe[item.id] = isNaN(v) ? null : v;
     }
@@ -676,10 +742,17 @@ function computeRankedPoints(entries, ascending){
 }
 function computeLeaderboard(allDocs){
   const totals = {};
-  CLASSES.forEach(k => { totals[k] = { quiz: 0, doe: 0, total: 0, updated: null }; });
+  const quizDetail = {};   // { klas: { rondeId: score } }
+  const doeDetail = {};    // { klas: { itemId: punten } }
+  CLASSES.forEach(k => {
+    totals[k] = { quiz: 0, doe: 0, total: 0, updated: null };
+    quizDetail[k] = {};
+    doeDetail[k] = {};
+  });
 
   CLASSES.forEach(k => {
     const d = allDocs[k];
+    RONDES.forEach(r => { quizDetail[k][r.id] = (d && d.quiz && d.quiz[r.id] && typeof d.quiz[r.id].score === "number") ? d.quiz[r.id].score : null; });
     if (!d) return;
     if (d.updatedAt && d.updatedAt.toDate) totals[k].updated = d.updatedAt.toDate();
     if (d.quiz){ Object.values(d.quiz).forEach(r => { totals[k].quiz += (r.score || 0); }); }
@@ -687,12 +760,18 @@ function computeLeaderboard(allDocs){
 
   CLASSES.forEach(k => {
     const d = allDocs[k];
+    DOE_ITEMS.forEach(item => { doeDetail[k][item.id] = null; });
     if (!d || !d.doe) return;
     DOE_ITEMS.forEach(item => {
-      if (item.type === "yesno"){ if (d.doe[item.id] === true) totals[k].doe += item.points; }
-      else if (item.type === "direct"){
+      if (item.type === "yesno"){
+        if (d.doe[item.id] === true){ doeDetail[k][item.id] = item.points; totals[k].doe += item.points; }
+        else if (d.doe[item.id] === false){ doeDetail[k][item.id] = 0; }
+      } else if (item.type === "direct"){
         const v = d.doe[item.id];
-        if (typeof v === "number") totals[k].doe += Math.max(0, Math.min(v, item.points));
+        if (typeof v === "number"){
+          const pts = Math.max(0, Math.min(v, item.points));
+          doeDetail[k][item.id] = pts; totals[k].doe += pts;
+        }
       }
     });
   });
@@ -702,7 +781,7 @@ function computeLeaderboard(allDocs){
       .filter(e => typeof e.value === "number");
     if (entries.length === 0) return;
     const pts = computeRankedPoints(entries, item.type === "time_asc");
-    Object.keys(pts).forEach(k => { totals[k].doe += pts[k]; });
+    Object.keys(pts).forEach(k => { doeDetail[k][item.id] = pts[k]; totals[k].doe += pts[k]; });
   });
 
   CLASSES.forEach(k => {
@@ -710,7 +789,7 @@ function computeLeaderboard(allDocs){
     totals[k].doe = Math.round(totals[k].doe * 10) / 10;
     totals[k].total = Math.round((totals[k].quiz + totals[k].doe) * 10) / 10;
   });
-  return totals;
+  return { totals, quizDetail, doeDetail };
 }
 
 let leaderboardUnsub = null;
@@ -719,9 +798,11 @@ function startLeaderboardListener(){
   leaderboardUnsub = db.collection("scores").onSnapshot(snapshot => {
     const allDocs = {};
     snapshot.forEach(doc => { allDocs[doc.id] = doc.data(); });
-    const totals = computeLeaderboard(allDocs);
+    const { totals, quizDetail, doeDetail } = computeLeaderboard(allDocs);
     const rows = CLASSES.map(k => ({ naam: k, ...totals[k] })).sort((a,b) => b.total - a.total);
     renderLeaderboard(rows);
+    renderDetailQuiz(quizDetail);
+    renderDetailDoe(doeDetail);
   });
 }
 function renderLeaderboard(rows){
@@ -737,6 +818,53 @@ function renderLeaderboard(rows){
     tbody.appendChild(tr);
   });
 }
+
+function renderDetailQuiz(quizDetail){
+  const thead = document.querySelector("#detailQuiz thead");
+  const tbody = document.querySelector("#detailQuiz tbody");
+  thead.innerHTML = "<tr><th>Klas</th>" + RONDES.map(r => "<th>" + r.thema.split("·")[0].trim() + "<br><span class='unit'>max " + r.vragen.length + "</span></th>").join("") + "</tr>";
+  tbody.innerHTML = "";
+  CLASSES.forEach(k => {
+    const tr = document.createElement("tr");
+    let cells = "<td><b>" + k + "</b></td>";
+    RONDES.forEach(r => {
+      const v = quizDetail[k][r.id];
+      cells += "<td>" + (v === null ? "—" : v) + "</td>";
+    });
+    tr.innerHTML = cells;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderDetailDoe(doeDetail){
+  const thead = document.querySelector("#detailDoe thead");
+  const tbody = document.querySelector("#detailDoe tbody");
+  thead.innerHTML = "<tr><th>Klas</th>" + DOE_ITEMS.map(i => "<th>" + i.label.replace(/^Doe-opdracht \d+ — /, "") + "</th>").join("") + "</tr>";
+  tbody.innerHTML = "";
+  CLASSES.forEach(k => {
+    const tr = document.createElement("tr");
+    let cells = "<td><b>" + k + "</b></td>";
+    DOE_ITEMS.forEach(item => {
+      const v = doeDetail[k][item.id];
+      cells += "<td>" + (v === null ? "—" : v) + "</td>";
+    });
+    tr.innerHTML = cells;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById("btnResetAll").onclick = () => {
+  if (!db) return;
+  if (!confirm("Alle quizantwoorden en teambuildingresultaten van ALLE klassen wissen? Dit kan niet ongedaan gemaakt worden.")) return;
+  if (!confirm("Weet je het zeker? Dit is de laatste bevestiging.")) return;
+  const msg = document.getElementById("resetMsg");
+  msg.textContent = "Bezig met wissen...";
+  Promise.all(CLASSES.map(k => db.collection("scores").doc(k).delete())).then(() => {
+    msg.textContent = "Alles gewist ✓ — klassen kunnen opnieuw beginnen.";
+  }).catch(err => {
+    msg.textContent = "⚠ Wissen mislukt: " + err.message;
+  });
+};
 
 render();
 </script>
