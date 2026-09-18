@@ -198,12 +198,12 @@
    INSTELLINGEN
    ============================================================ */
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDPPokXdf8xuRUtXgxvzDGTwJemP8nrATY",
-  authDomain: "teambuilding-1ste-jaar.firebaseapp.com",
-  projectId: "teambuilding-1ste-jaar",
-  storageBucket: "teambuilding-1ste-jaar.firebasestorage.app",
-  messagingSenderId: "685254520729",
-  appId: "1:685254520729:web:c29489cca9fff6d52f2d08"
+  apiKey: "PLAK_HIER_JE_API_KEY",
+  authDomain: "PLAK_HIER_JE_AUTH_DOMAIN",
+  projectId: "PLAK_HIER_JE_PROJECT_ID",
+  storageBucket: "PLAK_HIER_JE_STORAGE_BUCKET",
+  messagingSenderId: "PLAK_HIER_JE_SENDER_ID",
+  appId: "PLAK_HIER_JE_APP_ID"
 };
 const ADMIN_PASSWORD = "teambuilding2026";
 const CLASSES = ["1C","1D","1E","1F","1G","1H","1I","1J"];
@@ -384,16 +384,21 @@ function loadMyData(callback){
 }
 let saveTimer = null;
 function saveMyData(immediate){
-  if (!db || !session || session.role !== "klas" || !myData) return;
-  const doSave = () => {
-    db.collection("scores").doc(session.klas).set({
-      quiz: myData.quiz, doe: myData.doe,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-  };
-  if (immediate){ doSave(); return; }
+  if (!db || !session || session.role !== "klas" || !myData){
+    return Promise.reject(new Error("Niet verbonden met Firebase — controleer FIREBASE_CONFIG."));
+  }
+  const doSave = () => db.collection("scores").doc(session.klas).set({
+    quiz: myData.quiz, doe: myData.doe,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true }).catch(err => {
+    console.error("Opslaan naar Firestore mislukt:", err);
+    throw err;
+  });
+  if (immediate){ return doSave(); }
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(doSave, 500);
+  return new Promise((resolve, reject) => {
+    saveTimer = setTimeout(() => { doSave().then(resolve).catch(reject); }, 500);
+  });
 }
 
 function render(){
@@ -515,8 +520,14 @@ function renderKwis(){
         if (!confirm("Ronde indienen? Jullie kunnen deze antwoorden daarna niet meer aanpassen.")) return;
         roundData.submitted = true;
         roundData.score = gradeRound(ronde, roundData);
-        saveMyData(true);
-        renderRondePills(); renderKwis();
+        submitBtn.disabled = true; submitBtn.textContent = "Bezig met opslaan...";
+        saveMyData(true).then(() => {
+          renderRondePills(); renderKwis();
+        }).catch(err => {
+          roundData.submitted = false;
+          alert("Opslaan is mislukt, de ronde is NIET ingediend. Controleer je internetverbinding en de Firebase-instellingen.\n\nFoutmelding: " + err.message);
+          renderRondePills(); renderKwis();
+        });
       };
       card.appendChild(submitBtn);
     } else {
@@ -563,8 +574,8 @@ function renderKwis(){
         const cur = roundData.manualCorrect[kwisStep];
         okBtn.className = cur === true ? "sel-ok" : "";
         badBtn.className = cur === false ? "sel-bad" : "";
-        okBtn.onclick = () => { roundData.manualCorrect[kwisStep] = true; roundData.score = gradeRound(ronde, roundData); saveMyData(true); renderKwis(); };
-        badBtn.onclick = () => { roundData.manualCorrect[kwisStep] = false; roundData.score = gradeRound(ronde, roundData); saveMyData(true); renderKwis(); };
+        okBtn.onclick = () => { roundData.manualCorrect[kwisStep] = true; roundData.score = gradeRound(ronde, roundData); saveMyData(true).then(renderKwis).catch(err => alert("Opslaan mislukt: " + err.message)); renderKwis(); };
+        badBtn.onclick = () => { roundData.manualCorrect[kwisStep] = false; roundData.score = gradeRound(ronde, roundData); saveMyData(true).then(renderKwis).catch(err => alert("Opslaan mislukt: " + err.message)); renderKwis(); };
         toggle.appendChild(okBtn); toggle.appendChild(badBtn);
         block.appendChild(toggle);
       } else {
@@ -640,10 +651,14 @@ document.getElementById("btnSaveDoe").onclick = () => {
       myData.doe[item.id] = isNaN(v) ? null : v;
     }
   });
-  saveMyData(true);
   const msg = document.getElementById("doeSaveMsg");
-  msg.textContent = "Opgeslagen ✓";
-  setTimeout(() => { msg.textContent = ""; }, 2500);
+  msg.textContent = "Bezig met opslaan...";
+  saveMyData(true).then(() => {
+    msg.textContent = "Opgeslagen ✓";
+    setTimeout(() => { msg.textContent = ""; }, 2500);
+  }).catch(err => {
+    msg.textContent = "⚠ Opslaan mislukt: " + err.message;
+  });
 };
 
 /* ============================================================
