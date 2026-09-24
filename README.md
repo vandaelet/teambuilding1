@@ -76,6 +76,41 @@ Open `index.html` in een teksteditor en zoek de blokken `RONDES` en `SCORE_ITEMS
 daar in gewoon leesbare tekst. Ronde 6 bevat nog schoolspecifieke antwoorden — vul die in vóór de
 quizdag.
 
+## Muziekfragment toevoegen (Ronde 5, vraag 3)
+
+Deze vraag speelt een eigen muziekfragment af waarvan de leerlingen de titel/artiest moeten raden,
+zonder dat de bestandsnaam, titel of artiest ergens op het scherm zichtbaar is.
+
+1. Kies een mp3-bestand van een lied waarvoor jullie school gerechtigd is het in de klas af te
+   spelen. Claude voegt zelf geen bestaand lied toe — dat is auteursrechtelijk beschermd materiaal.
+2. Hernoem het bestand naar `muziekfragment.mp3` (generieke naam — geen titel of artiest erin).
+3. Verwijder indien mogelijk de ID3-metadata (titel/artiest-tags) uit het bestand, bv. via een
+   gratis tool als MP3Tag, zodat ook een systeem-mediabalk (op sommige laptops/telefoons) niets
+   kan verklappen. De website overschrijft dit sowieso al met een neutrale naam, maar dubbel
+   voorzichtig is beter.
+4. Upload `muziekfragment.mp3` naast `index.html` in dezelfde GitHub-repository (via "Add file →
+   Upload files", net zoals de andere bestanden).
+5. Klaar — bij Ronde 5, vraag 3 verschijnt nu automatisch een speler met enkel play/pause/volume,
+   geen titel of bestandsnaam. Zie je in plaats daarvan een rode waarschuwing op de site staan? Dan
+   is het bestand niet gevonden — controleer de bestandsnaam en de locatie.
+
+## Huisstijl, extra tabblad en uitgebreide uitleg
+
+- De site gebruikt nu het echte logo, de kleuren (turquoise `#4CBCC4` en oranje `#F9B000`) en de
+  lettertypes (Rubik + Kreon) van Campus Lievegem, gebaseerd op het aangeleverde huisstijldocument.
+- Elke klas heeft nu een derde tabblad **"🎲 Extra spelletjes"**: een lijst backup-activiteiten
+  zonder materiaal (fluisterspel, groepstellen, categorieën, Simon zegt, ...), voor als er nog tijd
+  over is. Deze tellen niet mee voor de punten. Pas de lijst gerust aan via `EXTRA_GAMES` bovenaan
+  het script-gedeelte.
+- Op de opstartpagina staat nu een korte uitleg over hoe de site werkt (aanmelden per klas, de drie
+  tabbladen, automatische puntentelling) — zichtbaar vóór het inloggen.
+- De hints bij elke teambuilding-activiteit zijn uitgebreider (hoe de opdracht precies verloopt),
+  en Doe-opdracht 7 (dierenalfabet) verwijst nu naar het extra blad in de envelop uit de
+  leraarskamer.
+- **Doe-opdracht 5 is aangepast**: geen marshmallowtoren meer, maar een toren van **satéstokjes en
+  loomrekkertjes** — de puntentelling (hoogte in cm, automatisch gerangschikt) werkt op precies
+  dezelfde manier.
+
 ## Belangrijk om te weten
 
 - Het leerkrachtwachtwoord staat zichtbaar in de broncode van de website (iedereen die goed zoekt
