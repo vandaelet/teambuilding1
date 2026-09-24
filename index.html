@@ -43,6 +43,10 @@
     color:var(--text);font-size:20px;font-weight:800;cursor:pointer;}
   .class-btn:hover{border-color:var(--accent);color:var(--accent);}
   .divider{border:none;border-top:1px solid var(--border);margin:32px 0;}
+  .intro-list{margin:14px 0 4px;padding-left:20px;font-size:14px;line-height:1.7;color:var(--text);}
+  .intro-list li{margin-bottom:10px;}
+  .intro-list ul{margin-top:8px;padding-left:18px;}
+  .intro-list ul li{margin-bottom:6px;color:var(--muted);}
   .admin-login{max-width:320px;margin:0 auto;text-align:left;}
   label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px;font-weight:600;}
   input[type=text],input[type=number],input[type=password],select{width:100%;padding:10px 12px;border-radius:8px;
@@ -106,9 +110,20 @@
   .doe-item:last-child{border-bottom:none;}
   .doe-item .lbl{font-weight:700;font-size:15px;}
   .doe-item .hint{color:var(--muted);font-size:13px;margin:4px 0 8px;}
-  .doe-row{display:flex;gap:10px;align-items:center;}
+  .doe-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
   .doe-row input, .doe-row select{max-width:220px;}
   .unit{color:var(--muted);font-size:13px;}
+  .doe-title{font-size:22px;font-weight:700;color:var(--accent2);margin-bottom:6px;font-family:var(--font-display);}
+  .doe-hint{color:var(--muted);font-size:14px;line-height:1.55;margin-bottom:18px;}
+  .stopwatch{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+    padding:16px 18px;margin-bottom:18px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .stopwatch .sw-display{font-family:var(--font-display);font-size:36px;font-weight:700;color:var(--accent);letter-spacing:1px;}
+  .stopwatch .sw-buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .stopwatch .sw-buttons button{padding:9px 16px;border-radius:8px;border:1px solid var(--border);
+    background:var(--card);color:var(--text);font-weight:700;font-size:13px;cursor:pointer;}
+  .stopwatch .sw-buttons button.sw-start{background:var(--accent);color:#0d1424;border-color:var(--accent);}
+  .stopwatch .sw-buttons button.sw-stop{background:var(--danger);color:#2b0710;border-color:var(--danger);}
+  .stopwatch .sw-use{font-size:12.5px;color:var(--muted);}
 
   table{width:100%;border-collapse:collapse;margin-top:6px;}
   th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--border);font-size:14px;}
@@ -138,18 +153,26 @@
   <section id="view-start" class="view active">
     <div id="setupWarning"></div>
     <div class="center-wrap">
-      <div class="card" style="text-align:left;margin-bottom:20px;">
+
+      <div class="card" id="start-intro" style="text-align:left;">
         <h2 class="section-title" style="text-align:center;">Hoe werkt deze site?</h2>
-        <p class="helptext" style="font-size:13.5px;">
-          Klik hieronder op je <b>klasnaam</b> om aan te melden — dat vervangt een wachtwoord. Je krijgt
-          dan drie tabbladen: <b>Quiz</b> (vragen per ronde beantwoorden, indienen, automatisch
-          verbeterd), <b>Teambuilding-activiteiten</b> (het gemeten resultaat van elke doe-opdracht
-          ingeven) en <b>Extra spelletjes</b> (backup-activiteiten zonder materiaal, voor als er nog
-          tijd over is). Punten worden voor quiz én teambuilding overal automatisch berekend en
-          gerangschikt — jullie moeten zelf niets optellen.
-        </p>
+        <ul class="intro-list">
+          <li>Klik straks op de naam van je <b>klas</b> om aan te melden — dat vervangt een wachtwoord.</li>
+          <li>Je krijgt daarna drie tabbladen:
+            <ul>
+              <li><b>Quiz</b> — beantwoord de vragen per ronde en dien de ronde in; wordt automatisch verbeterd.</li>
+              <li><b>Teambuilding-activiteiten</b> — geef per opdracht het gemeten resultaat in (tijd, afstand of aantal).</li>
+              <li><b>Extra spelletjes</b> — backup-activiteiten zonder materiaal, voor als er nog tijd over is.</li>
+            </ul>
+          </li>
+          <li>Punten worden voor quiz én teambuilding automatisch berekend en gerangschikt — jullie moeten zelf niets optellen.</li>
+          <li>Jullie beslissen zelf in welke volgorde jullie de onderdelen afwerken.</li>
+          <li>Enkel de leerkracht-organisator kan nadien de eindranglijst van alle klassen samen bekijken.</li>
+        </ul>
+        <button class="action btn-primary full" id="btnStartContinue" style="margin-top:8px;">Doorgaan naar aanmelden →</button>
       </div>
-      <div class="card">
+
+      <div class="card" id="start-login" style="display:none;">
         <h2 class="section-title">Kies je klas</h2>
         <p class="helptext">Klik op jouw klas om de quiz te starten en de teambuilding-activiteiten in te vullen.</p>
         <div class="class-grid" id="classGrid"></div>
@@ -162,7 +185,9 @@
           <button class="action btn-primary full" id="btnAdminLogin">Aanmelden als leerkracht</button>
           <div class="helptext" id="adminLoginMsg"></div>
         </div>
+        <button class="action btn-outline full" id="btnBackToIntro" style="margin-top:14px;">← Terug naar uitleg</button>
       </div>
+
     </div>
   </section>
 
@@ -182,17 +207,15 @@
     </div>
 
     <div id="sub-doe" class="subview">
-      <div class="card" style="max-width:640px;">
-        <h2 class="section-title">Teambuilding-activiteiten</h2>
-        <p class="helptext">
-          Vul per activiteit het gemeten resultaat in (tijd, afstand of aantal). De punten worden
-          automatisch berekend zodra alle klassen hun gegevens hebben ingevoerd — de definitieve
-          rangschikking is zichtbaar op het leerkrachtbord. Je kan deze waarden altijd nog aanpassen.
-        </p>
-        <div class="doe-list" id="doeList"></div>
-        <button class="action btn-primary full" id="btnSaveDoe">Opslaan</button>
-        <div class="helptext" id="doeSaveMsg"></div>
-      </div>
+      <p class="helptext" style="margin-bottom:14px;">
+        Vul per activiteit het gemeten resultaat in. De punten worden automatisch berekend zodra
+        alle klassen hun gegevens hebben ingevoerd — de definitieve rangschikking is zichtbaar op
+        het leerkrachtbord. Jullie beslissen zelf in welke volgorde jullie de opdrachten afwerken;
+        spring gerust heen en weer tussen de tabbladen.
+      </p>
+      <div class="proj-topbar" id="doePills"></div>
+      <div class="proj-card" id="doeCard" style="text-align:left;align-items:stretch;"></div>
+      <div class="proj-controls" id="doeControls"></div>
     </div>
 
     <div id="sub-extra" class="subview">
@@ -347,9 +370,9 @@ const DOE_ITEMS = [
   { id:"o1", label:"Doe-opdracht 1 — Gekke klasfoto", type:"yesno", points:5,
     hint:"Verzamel de klas voor een gekke, coole of grappige klasfoto. Maak de foto, plaats ze in de gedeelde groep van de titularissen 1ste jaar, en stuur ze ook door naar Evie. Vink hieronder 'Ja' aan zodra dit gebeurd is." },
   { id:"o2", label:"Doe-opdracht 2 — Zoektocht (3 voorwerpen)", type:"time_asc", inputMode:"time", unit:"seconden",
-    hint:"In de envelop zitten een elastiekje, een paperclip en een schoolbalpen. Verstop deze 3 voorwerpen op voorhand ergens in de klas. Op jouw startsignaal gaat de klas op zoek — spreek vooraf af dat er niets uit de kasten gesmeten mag worden. Neem de tijd vanaf het startsignaal tot het moment dat alle 3 voorwerpen bij jou zijn. Snelste klas krijgt de meeste punten." },
+    hint:"In de klas liggen al 3 voorwerpen verstopt: een elastiekje, een paperclip en een schoolbalpen. Zeg 'start' en laat de klas op zoek gaan — spreek vooraf af dat er niets uit de kasten gesmeten mag worden. Start de chronometer bij 'start' en stop hem zodra alle 3 voorwerpen bij jou zijn. Snelste klas krijgt de meeste punten." },
   { id:"o3", label:"Doe-opdracht 3 — Papieren vliegtuig", type:"value_desc", inputMode:"distance", unit:"cm",
-    hint:"Vouw met de klas een papieren vliegtuigje (papier zit in de envelop) en zet er de klasnaam op. Tijdens de speeltijd gooien jullie het samen met de andere klassen. Meet de afstand die het vliegtuigje aflegde. Verste klas krijgt de meeste punten." },
+    hint:"Vouw met de klas een papieren vliegtuigje (papier zit in de envelop) en zet er de klasnaam op. Dit gebeurt tijdens de speeltijd — neem het vliegtuigje dus mee naar buiten. Gooi samen met de andere klassen en meet de afstand die het aflegde. Verste klas krijgt de meeste punten." },
   { id:"o4", label:"Doe-opdracht 4 — Ballon opblazen", type:"time_asc", inputMode:"time", unit:"seconden",
     hint:"Eén leerling met een grote longinhoud blaast een ballon op (ballon zit in de envelop) tot hij knapt. Neem de tijd vanaf het begin van het opblazen tot de ballon knapt. Snelste klas krijgt de meeste punten." },
   { id:"o5", label:"Doe-opdracht 5 — Satéstokjes- en loomrekkertjestoren", type:"value_desc", unit:"cm",
@@ -437,6 +460,7 @@ function letterOf(answer){
    ============================================================ */
 let session = JSON.parse(localStorage.getItem("quiz_session") || "null");
 let myData = null;
+let startStep = "intro";
 
 function setSession(s){
   session = s;
@@ -446,6 +470,7 @@ function setSession(s){
 }
 function logout(){
   session = null;
+  startStep = "intro";
   localStorage.removeItem("quiz_session");
   render();
 }
@@ -507,6 +532,11 @@ function render(){
   document.getElementById("view-klas").classList.toggle("active", !!session && session.role === "klas");
   document.getElementById("view-admin").classList.toggle("active", !!session && session.role === "admin");
 
+  if (!session){
+    document.getElementById("start-intro").style.display = startStep === "intro" ? "block" : "none";
+    document.getElementById("start-login").style.display = startStep === "login" ? "block" : "none";
+  }
+
   const whoBar = document.getElementById("whoBar");
   whoBar.innerHTML = "";
   if (session){
@@ -520,13 +550,15 @@ function render(){
   }
 
   if (session && session.role === "klas"){
-    if (!myData){ loadMyData(() => { renderRondePills(); renderKwis(); renderDoeForm(); }); }
-    else { renderRondePills(); renderKwis(); renderDoeForm(); }
+    if (!myData){ loadMyData(() => { renderRondePills(); renderKwis(); renderDoePills(); renderDoeItem(); }); }
+    else { renderRondePills(); renderKwis(); renderDoePills(); renderDoeItem(); }
   }
   if (session && session.role === "admin"){
     startLeaderboardListener();
   }
 }
+document.getElementById("btnStartContinue").onclick = () => { startStep = "login"; render(); };
+document.getElementById("btnBackToIntro").onclick = () => { startStep = "intro"; render(); };
 
 /* start screen */
 const classGrid = document.getElementById("classGrid");
@@ -734,96 +766,184 @@ function renderKwis(){
 }
 
 /* ============================================================
-   TEAMBUILDING-ACTIVITEITEN (invoerformulier)
+   TEAMBUILDING-ACTIVITEITEN (tabblad per opdracht, met chronometer)
    ============================================================ */
-function renderDoeForm(){
-  const list = document.getElementById("doeList");
-  list.innerHTML = "";
-  DOE_ITEMS.forEach(item => {
-    const wrap = document.createElement("div"); wrap.className = "doe-item";
-    const lbl = document.createElement("div"); lbl.className = "lbl"; lbl.textContent = item.label;
-    const hint = document.createElement("div"); hint.className = "hint"; hint.textContent = item.hint;
-    const row = document.createElement("div"); row.className = "doe-row";
+let doeIdx = 0;
+let sw = { itemId: null, running: false, startTs: 0, elapsedMs: 0, timerId: null };
+let swDisplayEl = null;
 
-    if (item.type === "yesno"){
-      const select = document.createElement("select");
-      select.innerHTML = '<option value="">— kies —</option><option value="ja">Ja</option><option value="nee">Nee</option>';
-      select.value = myData.doe[item.id] === true ? "ja" : (myData.doe[item.id] === false ? "nee" : "");
-      select.id = "doe_" + item.id;
-      row.appendChild(select);
-      const span = document.createElement("span"); span.className = "unit"; span.textContent = "(" + item.points + " punten indien ja)";
-      row.appendChild(span);
-    } else if (item.inputMode === "time"){
-      const total = (typeof myData.doe[item.id] === "number") ? myData.doe[item.id] : null;
-      const mins = total !== null ? Math.floor(total / 60) : "";
-      const secs = total !== null ? (total % 60) : "";
-      const minInput = document.createElement("input");
-      minInput.type = "number"; minInput.min = "0"; minInput.step = "1";
-      minInput.id = "doe_" + item.id + "_min"; minInput.value = mins; minInput.style.maxWidth = "90px";
-      const secInput = document.createElement("input");
-      secInput.type = "number"; secInput.min = "0"; secInput.max = "59"; secInput.step = "1";
-      secInput.id = "doe_" + item.id + "_sec"; secInput.value = secs; secInput.style.maxWidth = "90px";
-      row.appendChild(minInput);
-      const span1 = document.createElement("span"); span1.className = "unit"; span1.textContent = "min"; row.appendChild(span1);
-      row.appendChild(secInput);
-      const span2 = document.createElement("span"); span2.className = "unit"; span2.textContent = "sec"; row.appendChild(span2);
-    } else if (item.inputMode === "distance"){
-      const total = (typeof myData.doe[item.id] === "number") ? myData.doe[item.id] : null;
-      const meters = total !== null ? Math.floor(total / 100) : "";
-      const cm = total !== null ? (total % 100) : "";
-      const mInput = document.createElement("input");
-      mInput.type = "number"; mInput.min = "0"; mInput.step = "1";
-      mInput.id = "doe_" + item.id + "_m"; mInput.value = meters; mInput.style.maxWidth = "90px";
-      const cmInput = document.createElement("input");
-      cmInput.type = "number"; cmInput.min = "0"; cmInput.max = "99"; cmInput.step = "1";
-      cmInput.id = "doe_" + item.id + "_cm"; cmInput.value = cm; cmInput.style.maxWidth = "90px";
-      row.appendChild(mInput);
-      const span1 = document.createElement("span"); span1.className = "unit"; span1.textContent = "m"; row.appendChild(span1);
-      row.appendChild(cmInput);
-      const span2 = document.createElement("span"); span2.className = "unit"; span2.textContent = "cm"; row.appendChild(span2);
-    } else {
-      const input = document.createElement("input");
-      input.type = "number"; input.min = "0"; input.step = "0.1";
-      input.id = "doe_" + item.id;
-      input.value = (typeof myData.doe[item.id] === "number") ? myData.doe[item.id] : "";
-      row.appendChild(input);
-      const span = document.createElement("span"); span.className = "unit"; span.textContent = item.unit;
-      row.appendChild(span);
-    }
-    wrap.appendChild(lbl); wrap.appendChild(hint); wrap.appendChild(row);
-    list.appendChild(wrap);
+function fmtStopwatch(ms){
+  const totalSec = Math.floor(ms / 1000);
+  const mm = String(Math.floor(totalSec / 60)).padStart(2, "0");
+  const ss = String(totalSec % 60).padStart(2, "0");
+  return mm + ":" + ss;
+}
+function swTick(){
+  if (!sw.running || !swDisplayEl) return;
+  swDisplayEl.textContent = fmtStopwatch(sw.elapsedMs + (Date.now() - sw.startTs));
+}
+function swStart(){
+  if (sw.running) return;
+  sw.running = true; sw.startTs = Date.now();
+  sw.timerId = setInterval(swTick, 200);
+}
+function swStop(){
+  if (sw.running){ sw.elapsedMs += Date.now() - sw.startTs; sw.running = false; }
+  clearInterval(sw.timerId); sw.timerId = null;
+  if (swDisplayEl) swDisplayEl.textContent = fmtStopwatch(sw.elapsedMs);
+}
+function swReset(){
+  clearInterval(sw.timerId); sw.timerId = null;
+  sw.running = false; sw.elapsedMs = 0; sw.startTs = 0;
+  if (swDisplayEl) swDisplayEl.textContent = fmtStopwatch(0);
+}
+
+function renderDoePills(){
+  const el = document.getElementById("doePills");
+  if (!el) return;
+  el.innerHTML = "";
+  DOE_ITEMS.forEach((item, i) => {
+    const btn = document.createElement("button");
+    btn.className = "ronde-pill" + (i === doeIdx ? " active" : "");
+    const done = myData.doe[item.id] !== null && typeof myData.doe[item.id] !== "undefined";
+    btn.innerHTML = (done ? '<span class="check">✓</span>' : "") + "Opdracht " + (i + 1);
+    btn.onclick = () => { doeIdx = i; renderDoePills(); renderDoeItem(); };
+    el.appendChild(btn);
   });
 }
-document.getElementById("btnSaveDoe").onclick = () => {
-  DOE_ITEMS.forEach(item => {
-    if (item.type === "yesno"){
-      const el = document.getElementById("doe_" + item.id);
-      myData.doe[item.id] = el.value === "ja" ? true : (el.value === "nee" ? false : null);
-    } else if (item.inputMode === "time"){
+
+function renderDoeItem(){
+  const item = DOE_ITEMS[doeIdx];
+  if (sw.itemId !== item.id){
+    clearInterval(sw.timerId);
+    sw = { itemId: item.id, running: false, startTs: 0, elapsedMs: 0, timerId: null };
+  }
+  swDisplayEl = null;
+  const card = document.getElementById("doeCard");
+  card.innerHTML = "";
+
+  const title = document.createElement("div"); title.className = "doe-title"; title.textContent = item.label;
+  const hint = document.createElement("div"); hint.className = "doe-hint"; hint.textContent = item.hint;
+  card.appendChild(title); card.appendChild(hint);
+
+  if (item.inputMode === "time"){
+    const swWrap = document.createElement("div"); swWrap.className = "stopwatch";
+    const disp = document.createElement("div"); disp.className = "sw-display"; disp.textContent = fmtStopwatch(sw.elapsedMs);
+    swDisplayEl = disp;
+    const btnRow = document.createElement("div"); btnRow.className = "sw-buttons";
+    const startBtn = document.createElement("button"); startBtn.className = "sw-start"; startBtn.textContent = "▶ Start";
+    const stopBtn = document.createElement("button"); stopBtn.className = "sw-stop"; stopBtn.textContent = "⏸ Stop";
+    const resetBtn = document.createElement("button"); resetBtn.textContent = "↺ Reset";
+    const useBtn = document.createElement("button"); useBtn.textContent = "✓ Gebruik deze tijd";
+    startBtn.onclick = () => swStart();
+    stopBtn.onclick = () => swStop();
+    resetBtn.onclick = () => swReset();
+    useBtn.onclick = () => {
+      swStop();
+      const totalSec = Math.round(sw.elapsedMs / 1000);
       const minEl = document.getElementById("doe_" + item.id + "_min");
       const secEl = document.getElementById("doe_" + item.id + "_sec");
-      const m = parseFloat(minEl.value), s = parseFloat(secEl.value);
-      myData.doe[item.id] = (isNaN(m) && isNaN(s)) ? null : (Math.max(0, m || 0) * 60 + Math.max(0, Math.min(59, s || 0)));
-    } else if (item.inputMode === "distance"){
-      const mEl = document.getElementById("doe_" + item.id + "_m");
-      const cmEl = document.getElementById("doe_" + item.id + "_cm");
-      const m = parseFloat(mEl.value), cm = parseFloat(cmEl.value);
-      myData.doe[item.id] = (isNaN(m) && isNaN(cm)) ? null : (Math.max(0, m || 0) * 100 + Math.max(0, Math.min(99, cm || 0)));
-    } else {
-      const el = document.getElementById("doe_" + item.id);
-      const v = parseFloat(el.value);
-      myData.doe[item.id] = isNaN(v) ? null : v;
-    }
-  });
-  const msg = document.getElementById("doeSaveMsg");
-  msg.textContent = "Bezig met opslaan...";
+      if (minEl && secEl){ minEl.value = Math.floor(totalSec / 60); secEl.value = totalSec % 60; }
+    };
+    [startBtn, stopBtn, resetBtn, useBtn].forEach(b => btnRow.appendChild(b));
+    const note = document.createElement("div"); note.className = "sw-use";
+    note.textContent = "Tip: klik op 'Gebruik deze tijd' om het gemeten resultaat automatisch in de velden hieronder te zetten. Je mag de velden ook gewoon manueel invullen.";
+    swWrap.appendChild(disp); swWrap.appendChild(btnRow); swWrap.appendChild(note);
+    card.appendChild(swWrap);
+  }
+
+  const row = document.createElement("div"); row.className = "doe-row";
+  if (item.type === "yesno"){
+    const select = document.createElement("select");
+    select.innerHTML = '<option value="">— kies —</option><option value="ja">Ja</option><option value="nee">Nee</option>';
+    select.value = myData.doe[item.id] === true ? "ja" : (myData.doe[item.id] === false ? "nee" : "");
+    select.id = "doe_" + item.id;
+    row.appendChild(select);
+    const span = document.createElement("span"); span.className = "unit"; span.textContent = "(" + item.points + " punten indien ja)";
+    row.appendChild(span);
+  } else if (item.inputMode === "time"){
+    const total = (typeof myData.doe[item.id] === "number") ? myData.doe[item.id] : null;
+    const minInput = document.createElement("input");
+    minInput.type = "number"; minInput.min = "0"; minInput.step = "1";
+    minInput.id = "doe_" + item.id + "_min"; minInput.value = total !== null ? Math.floor(total / 60) : ""; minInput.style.maxWidth = "90px";
+    const secInput = document.createElement("input");
+    secInput.type = "number"; secInput.min = "0"; secInput.max = "59"; secInput.step = "1";
+    secInput.id = "doe_" + item.id + "_sec"; secInput.value = total !== null ? (total % 60) : ""; secInput.style.maxWidth = "90px";
+    row.appendChild(minInput);
+    const s1 = document.createElement("span"); s1.className = "unit"; s1.textContent = "min"; row.appendChild(s1);
+    row.appendChild(secInput);
+    const s2 = document.createElement("span"); s2.className = "unit"; s2.textContent = "sec"; row.appendChild(s2);
+  } else if (item.inputMode === "distance"){
+    const total = (typeof myData.doe[item.id] === "number") ? myData.doe[item.id] : null;
+    const mInput = document.createElement("input");
+    mInput.type = "number"; mInput.min = "0"; mInput.step = "1";
+    mInput.id = "doe_" + item.id + "_m"; mInput.value = total !== null ? Math.floor(total / 100) : ""; mInput.style.maxWidth = "90px";
+    const cmInput = document.createElement("input");
+    cmInput.type = "number"; cmInput.min = "0"; cmInput.max = "99"; cmInput.step = "1";
+    cmInput.id = "doe_" + item.id + "_cm"; cmInput.value = total !== null ? (total % 100) : ""; cmInput.style.maxWidth = "90px";
+    row.appendChild(mInput);
+    const s1 = document.createElement("span"); s1.className = "unit"; s1.textContent = "m"; row.appendChild(s1);
+    row.appendChild(cmInput);
+    const s2 = document.createElement("span"); s2.className = "unit"; s2.textContent = "cm"; row.appendChild(s2);
+  } else {
+    const input = document.createElement("input");
+    input.type = "number"; input.min = "0"; input.step = "0.1";
+    input.id = "doe_" + item.id;
+    input.value = (typeof myData.doe[item.id] === "number") ? myData.doe[item.id] : "";
+    row.appendChild(input);
+    const span = document.createElement("span"); span.className = "unit"; span.textContent = item.unit;
+    row.appendChild(span);
+  }
+  card.appendChild(row);
+
+  const saveBtn = document.createElement("button");
+  saveBtn.className = "action btn-primary"; saveBtn.style.marginTop = "20px"; saveBtn.textContent = "Opslaan";
+  const statusEl = document.createElement("div"); statusEl.className = "helptext"; statusEl.style.marginTop = "8px";
+  saveBtn.onclick = () => saveSingleDoeItem(item, statusEl);
+  card.appendChild(saveBtn); card.appendChild(statusEl);
+
+  const controls = document.getElementById("doeControls");
+  controls.innerHTML = "";
+  const prevBtn = document.createElement("button");
+  prevBtn.className = "btn-secondary"; prevBtn.textContent = "← Vorige opdracht";
+  prevBtn.disabled = doeIdx === 0; prevBtn.style.opacity = doeIdx === 0 ? .4 : 1;
+  prevBtn.onclick = () => { doeIdx--; renderDoePills(); renderDoeItem(); };
+  const nextBtn = document.createElement("button");
+  nextBtn.className = "btn-secondary"; nextBtn.textContent = "Volgende opdracht →";
+  const atEnd = doeIdx === DOE_ITEMS.length - 1;
+  nextBtn.disabled = atEnd; nextBtn.style.opacity = atEnd ? .4 : 1;
+  nextBtn.onclick = () => { doeIdx++; renderDoePills(); renderDoeItem(); };
+  controls.appendChild(prevBtn); controls.appendChild(nextBtn);
+}
+
+function saveSingleDoeItem(item, statusEl){
+  if (item.type === "yesno"){
+    const el = document.getElementById("doe_" + item.id);
+    myData.doe[item.id] = el.value === "ja" ? true : (el.value === "nee" ? false : null);
+  } else if (item.inputMode === "time"){
+    const minEl = document.getElementById("doe_" + item.id + "_min");
+    const secEl = document.getElementById("doe_" + item.id + "_sec");
+    const m = parseFloat(minEl.value), s = parseFloat(secEl.value);
+    myData.doe[item.id] = (isNaN(m) && isNaN(s)) ? null : (Math.max(0, m || 0) * 60 + Math.max(0, Math.min(59, s || 0)));
+  } else if (item.inputMode === "distance"){
+    const mEl = document.getElementById("doe_" + item.id + "_m");
+    const cmEl = document.getElementById("doe_" + item.id + "_cm");
+    const m = parseFloat(mEl.value), cm = parseFloat(cmEl.value);
+    myData.doe[item.id] = (isNaN(m) && isNaN(cm)) ? null : (Math.max(0, m || 0) * 100 + Math.max(0, Math.min(99, cm || 0)));
+  } else {
+    const el = document.getElementById("doe_" + item.id);
+    const v = parseFloat(el.value);
+    myData.doe[item.id] = isNaN(v) ? null : v;
+  }
+  statusEl.textContent = "Bezig met opslaan...";
   saveMyData(true).then(() => {
-    msg.textContent = "Opgeslagen ✓";
-    setTimeout(() => { msg.textContent = ""; }, 2500);
+    statusEl.textContent = "Opgeslagen ✓";
+    renderDoePills();
+    setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 2500);
   }).catch(err => {
-    msg.textContent = "⚠ Opslaan mislukt: " + err.message;
+    statusEl.textContent = "⚠ Opslaan mislukt: " + err.message;
   });
-};
+}
 
 /* ============================================================
    ADMIN — LIVE LEIDERBOARD

@@ -111,6 +111,23 @@ zonder dat de bestandsnaam, titel of artiest ergens op het scherm zichtbaar is.
   loomrekkertjes** — de puntentelling (hoogte in cm, automatisch gerangschikt) werkt op precies
   dezelfde manier.
 
+## Opstartpagina in twee stappen, en teambuilding-activiteiten per tabblad
+
+- De opstartpagina toont nu eerst een **opsomming "Hoe werkt deze site?"**, met een knop "Doorgaan
+  naar aanmelden →" die pas daarna de klasknoppen toont. Na uitloggen verschijnt deze uitleg
+  automatisch weer als eerste (handig op een gedeeld beamertoestel dat van klas wisselt).
+- **Teambuilding-activiteiten** werkt nu net zoals de Quiz: bovenaan een rij tabbladen ("Opdracht
+  1" t/m "Opdracht 7", met een ✓ zodra er een waarde is opgeslagen), en daaronder telkens één
+  opdracht met titel, uitleg, invoervelden en een eigen "Opslaan"-knop. Met "Vorige opdracht" /
+  "Volgende opdracht" of door rechtstreeks op een tabblad te klikken, spring je moeiteloos heen en
+  weer — handig omdat de opdrachten in willekeurige volgorde gebeuren.
+- Bij de twee tijdsopnames (Zoektocht en Ballon opblazen) staat nu een ingebouwde **chronometer**:
+  Start/Stop/Reset, en een knop "Gebruik deze tijd" die het gemeten resultaat automatisch in de
+  minuten/seconden-velden zet. Op "Opslaan" klikken blijft nog wel nodig — dat gebeurt bewust niet
+  vanzelf, zodat niemand per ongeluk een verkeerde meting opslaat.
+- Doe-opdracht 2 vermeldt nu dat de voorwerpen al verstopt zitten (de tijd start pas bij "start"),
+  en Doe-opdracht 3 vermeldt dat het vliegtuigje mee naar buiten moet tijdens de speeltijd.
+
 ## Belangrijk om te weten
 
 - Het leerkrachtwachtwoord staat zichtbaar in de broncode van de website (iedereen die goed zoekt
